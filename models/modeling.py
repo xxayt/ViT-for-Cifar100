@@ -339,7 +339,9 @@ class VisionTransformer(nn.Module):
 
 CONFIGS = {
     'ViT-B_16': configs.get_b16_config(),
+    'ViT-B_16-h2': configs.get_b16_head2_config(),
     'ViT-B_16-h4': configs.get_b16_head4_config(),
+    'ViT-B_16-h16': configs.get_b16_head16_config(),
     'ViT-B_32': configs.get_b32_config(),
     'ViT-L_16': configs.get_l16_config(),
     'ViT-L_32': configs.get_l32_config(),

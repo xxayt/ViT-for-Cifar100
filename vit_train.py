@@ -77,7 +77,8 @@ def parse_option():
     parser.add_argument("--pretrain_dir", type=str, default="./pretrain", help="Where to search for pretrained ViT models.")
     parser.add_argument('--pretrain', type=str, default="ViT-B_16.npz", help='vit_base_patch16_224_in21k.pth')
     parser.add_argument('--model_file', type=str, default='modeling')
-    parser.add_argument("--model_name", choices=["ViT-B_16", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16", "ViT-B_16-h4"],
+    parser.add_argument("--model_name", 
+                        choices=["ViT-B_16", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16", "ViT-B_16-h4", "ViT-B_16-h16", "ViT-B_16-h2"],
                         default="ViT-B_16", help="Which variant to use.")
     # 是否冻结权重
 
