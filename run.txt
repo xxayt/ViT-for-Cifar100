@@ -3,5 +3,6 @@ tensorboard --logdir ./logs/[path of tensorboard file] --port=[eg:6008]
 
 
 CUDA_VISIBLE_DEVICES=1 python train.py --name cifar100-b16 --dataset cifar100 --model_name ViT-B_16 --pretrain_dir pretrain/ViT-B_16.npz
-CUDA_VISIBLE_DEVICES=1 python train2.py --name cifar100-b16 --data cifar100 --model_name ViT-B_16 --pretrain_dir pretrain/ViT-B_16.npz
+
 CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16 --data cifar100 --model_name ViT-B_16 --pretrain ViT-B_16.npz
+CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h4 --data cifar100 --model_name ViT-B_16-h4 --pretrain ViT-B_16.npz

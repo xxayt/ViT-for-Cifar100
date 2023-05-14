@@ -22,10 +22,6 @@ try:
     has_apex = True
 except ImportError:
     has_apex = False
-    # raise ImportError("Please install apex from https://www.github.com/nvidia/apex to run this example.")
-
-# from apex import amp
-# from apex.parallel import DistributedDataParallel as DDP
 
 from models.modeling import VisionTransformer, CONFIGS
 from utils.scheduler import WarmupLinearSchedule, WarmupCosineSchedule
@@ -36,7 +32,6 @@ from timm.utils import accuracy, AverageMeter
 def setup(args, logger):
     # Prepare model
     config = CONFIGS[args.model_name]
-
     num_classes = 10 if args.data == "cifar10" else 100
 
     model = VisionTransformer(config, args.img_size, zero_head=True, num_classes=num_classes)
@@ -77,12 +72,12 @@ def parse_option():
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument("--train_batch_size", default=32, type=int, help="Total batch size for training.")
     parser.add_argument("--lr", default=3e-2, type=float, help="The initial learning rate for SGD.")
-    parser.add_argument("--args.max_accuracy", default=0.0, type=float)
+    parser.add_argument("--max_accuracy", default=0.0, type=float)
     # model
     parser.add_argument("--pretrain_dir", type=str, default="./pretrain", help="Where to search for pretrained ViT models.")
     parser.add_argument('--pretrain', type=str, default="ViT-B_16.npz", help='vit_base_patch16_224_in21k.pth')
     parser.add_argument('--model_file', type=str, default='modeling')
-    parser.add_argument("--model_name", choices=["ViT-B_16", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16"],
+    parser.add_argument("--model_name", choices=["ViT-B_16", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16", "ViT-B_16-h4"],
                         default="ViT-B_16", help="Which variant to use.")
     # 是否冻结权重
 
