@@ -53,7 +53,7 @@ To verify that the converted model weight is correct, we simply compare it with 
 |:------------:|:---------:|:----------:|:-------------:|:--------------:|:-------:|
 |   ViT-B_16   | CIFAR-10  |  224x224   |       -       |     0.9908     | 3h 13m  |
 |   ViT-B_16   | CIFAR-10  |  384x384   |    0.9903     |     0.9906     | 12h 25m |
-|   ViT_B_16   | CIFAR-100 |  224x224   |       -       |     0.923      |  3h 9m  |
+|   ViT_B_16   | CIFAR-100 |  224x224   |       -       |     0.923 (me:92.46)      |  3h 9m  |
 |   ViT_B_16   | CIFAR-100 |  384x384   |    0.9264     |     0.9228     | 12h 31m |
 | R50-ViT-B_16 | CIFAR-10  |  224x224   |       -       |     0.9892     | 4h 23m  |
 | R50-ViT-B_16 | CIFAR-10  |  384x384   |     0.99      |     0.9904     | 15h 40m |

@@ -77,6 +77,7 @@ def parse_option():
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument("--train_batch_size", default=32, type=int, help="Total batch size for training.")
     parser.add_argument("--lr", default=3e-2, type=float, help="The initial learning rate for SGD.")
+    parser.add_argument("--args.max_accuracy", default=0.0, type=float)
     # model
     parser.add_argument("--pretrain_dir", type=str, default="./pretrain", help="Where to search for pretrained ViT models.")
     parser.add_argument('--pretrain', type=str, default="ViT-B_16.npz", help='vit_base_patch16_224_in21k.pth')
@@ -167,15 +168,14 @@ def main(args):
                                 lr=args.lr,
                                 momentum=0.9,
                                 weight_decay=args.weight_decay)
-    t_total = args.num_steps
     if args.decay_type == "cosine":
-        scheduler = WarmupCosineSchedule(optimizer, warmup_steps=args.warmup_steps, t_total=t_total)
+        scheduler = WarmupCosineSchedule(optimizer, warmup_steps=args.warmup_steps, t_total=len(train_loader) * args.epochs)
     else:
-        scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.warmup_steps, t_total=t_total)
+        scheduler = WarmupLinearSchedule(optimizer, warmup_steps=args.warmup_steps, t_total=len(train_loader) * args.epochs)
 
 
     start_epoch = 1
-    max_accuracy = 0.0
+    # args.max_accuracy = 0.0
     args.start_epoch = start_epoch
     logger.info("Start training")
     model.zero_grad()
@@ -183,17 +183,16 @@ def main(args):
     for epoch in range(start_epoch, args.epochs + 1):
         # train
         train_loss, train_acc = train_one_epoch_local_data(train_loader, val_loader, model, loss_function, optimizer, scheduler, epoch, logger, args, tb_writer)
-        save_checkpoint(epoch, model, optimizer, max_accuracy, args, logger, save_name='Latest'+'-epoch'+str(epoch))
+        save_checkpoint(epoch, model, optimizer, args.max_accuracy, args, logger, save_name='Latest'+'-epoch'+str(epoch))
         
         # validate
         logger.info(f"**********Latest val***********")
         val_loss, val_acc = validate(val_loader, model, loss_function, epoch, logger, args, tb_writer)
-
         # 保存最好效果
-        if val_acc > max_accuracy:
-            max_accuracy = val_acc
-            logger.info(f'Max accuracy: {max_accuracy:.4f}%')
-            save_checkpoint(epoch, model, optimizer, max_accuracy, args, logger, save_name='Best')
+        if val_acc > args.max_accuracy:
+            args.max_accuracy = val_acc
+            logger.info(f'Max accuracy: {args.max_accuracy:.4f}')
+            save_checkpoint(epoch, model, optimizer, args.max_accuracy, args, logger, save_name='Best')
         logger.info('Exp path: %s' % args.path_log)
 
     # 总时间
@@ -202,7 +201,7 @@ def main(args):
     logger.info('Training time {}'.format(total_time_str))
 
 
-def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, optimizer, scheduler, epoch, logger, args, tb_writer=None):
+def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, optimizer, scheduler, epoch, logger, args, tb_writer):
     model.train()
     optimizer.zero_grad()
     scaler = torch.cuda.amp.GradScaler()  # 自动混合精度训练
@@ -250,6 +249,10 @@ def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, o
                 f'Acc@5 {acc5_meter.val:.3f} ({acc5_meter.avg:.3f})')
         if iter % 100 == 0 and iter > 0:
             val_loss, val_acc = validate(val_loader, model, loss_function, epoch, logger, args, tb_writer)
+            if val_acc > args.max_accuracy:
+                args.max_accuracy = val_acc
+                logger.info(f'Max accuracy: {args.max_accuracy:.4f}')
+                save_checkpoint(epoch, model, optimizer, args.max_accuracy, args, logger, save_name='Best')
             model.train()
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")

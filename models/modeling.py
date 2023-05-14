@@ -73,10 +73,11 @@ class Attention(nn.Module):
         return x.permute(0, 2, 1, 3)
 
     def forward(self, hidden_states):
+        # [bs, token_size, hidden_size=768] -> [bs, token_size, all_head_size=768]
         mixed_query_layer = self.query(hidden_states)
         mixed_key_layer = self.key(hidden_states)
         mixed_value_layer = self.value(hidden_states)
-
+        # [bs, token_size, all_head_size=768] -> [bs, num_attention_heads=12, token_size, attention_head_size=64]
         query_layer = self.transpose_for_scores(mixed_query_layer)
         key_layer = self.transpose_for_scores(mixed_key_layer)
         value_layer = self.transpose_for_scores(mixed_value_layer)
