@@ -242,7 +242,7 @@ def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, o
                 f'Loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'Acc@1 {acc1_meter.val:.3f} ({acc1_meter.avg:.3f})\t'
                 f'Acc@5 {acc5_meter.val:.3f} ({acc5_meter.avg:.3f})')
-        if iter % 100 == 0 and iter > 0:
+        if iter % 200 == 0 and iter > 0:
             val_loss, val_acc = validate(val_loader, model, loss_function, epoch, logger, args, tb_writer)
             if val_acc > args.max_accuracy:
                 args.max_accuracy = val_acc
