@@ -274,11 +274,11 @@ class VisionTransformer(nn.Module):
         logits = self.head(x[:, 0])
 
         if labels is not None:
-            loss_fct = CrossEntropyLoss()
-            loss = loss_fct(logits.view(-1, self.num_classes), labels.view(-1))
+            loss_function = CrossEntropyLoss()
+            loss = loss_function(logits.view(-1, self.num_classes), labels.view(-1))
             return loss
         else:
-            return logits, attn_weights
+            return logits
 
     def load_from(self, weights):
         with torch.no_grad():

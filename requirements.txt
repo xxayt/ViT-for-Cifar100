@@ -1,5 +1,7 @@
-torch
+torch==1.8.1
+torchvision==0.9.1
 numpy
 tqdm
-tensorboard
+tensorboard==2.10.1
+scipy
 ml-collections

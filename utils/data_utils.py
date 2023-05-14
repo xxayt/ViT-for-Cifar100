@@ -24,22 +24,22 @@ def get_loader(args):
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
     ])
 
-    if args.dataset == "cifar10":
-        trainset = datasets.CIFAR10(root="./data",
+    if args.data == "cifar10":
+        trainset = datasets.CIFAR10(root=args.data_path,
                                     train=True,
                                     download=True,
                                     transform=transform_train)
-        testset = datasets.CIFAR10(root="./data",
+        testset = datasets.CIFAR10(root=args.data_path,
                                    train=False,
                                    download=True,
                                    transform=transform_test) if args.local_rank in [-1, 0] else None
 
     else:
-        trainset = datasets.CIFAR100(root="./data",
+        trainset = datasets.CIFAR100(root=args.data_path,
                                      train=True,
                                      download=True,
                                      transform=transform_train)
-        testset = datasets.CIFAR100(root="./data",
+        testset = datasets.CIFAR100(root=args.data_path,
                                     train=False,
                                     download=True,
                                     transform=transform_test) if args.local_rank in [-1, 0] else None
