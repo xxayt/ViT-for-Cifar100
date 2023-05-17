@@ -46,7 +46,9 @@ def get_loader(args):
     if args.local_rank == 0:
         torch.distributed.barrier()
 
+    # 对样本随机采样
     train_sampler = RandomSampler(trainset) if args.local_rank == -1 else DistributedSampler(trainset)
+    # 对样本按顺序采样
     test_sampler = SequentialSampler(testset)
     train_loader = DataLoader(trainset,
                               sampler=train_sampler,

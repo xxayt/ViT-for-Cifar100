@@ -79,22 +79,30 @@ class Attention(nn.Module):
         mixed_value_layer = self.value(hidden_states)
         # [bs, token_size, all_head_size=768] -> [bs, num_attention_heads=12, token_size, attention_head_size=64]
         query_layer = self.transpose_for_scores(mixed_query_layer)
+        head_Q = query_layer
         key_layer = self.transpose_for_scores(mixed_key_layer)
+        head_K = key_layer
         value_layer = self.transpose_for_scores(mixed_value_layer)
-
+        head_V = value_layer
+        # [bs, num_attention_heads=12, token_size, attention_head_size=64] * [bs, num_attention_heads=12, attention_head_size=64, token_size]
+        #  -> [bs, num_attention_heads=12, token_size, token_size]
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
+
+
         attention_scores = attention_scores / math.sqrt(self.attention_head_size)
         attention_probs = self.softmax(attention_scores)
         weights = attention_probs if self.vis else None
         attention_probs = self.attn_dropout(attention_probs)
 
         context_layer = torch.matmul(attention_probs, value_layer)
+        head_O = context_layer
+        # 拼接
         context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
         attention_output = self.out(context_layer)
         attention_output = self.proj_dropout(attention_output)
-        return attention_output, weights
+        return attention_output, weights, head_Q, head_K, head_V, head_O
 
 
 class Mlp(nn.Module):
@@ -181,14 +189,14 @@ class Block(nn.Module):
     def forward(self, x):
         h = x
         x = self.attention_norm(x)
-        x, weights = self.attn(x)
+        x, weights, head_Q, head_K, head_V, head_O = self.attn(x)
         x = x + h
 
         h = x
         x = self.ffn_norm(x)
         x = self.ffn(x)
         x = x + h
-        return x, weights
+        return x, weights, head_Q, head_K, head_V, head_O
 
     def load_from(self, weights, n_block):
         ROOT = f"Transformer/encoderblock_{n_block}"
@@ -239,13 +247,18 @@ class Encoder(nn.Module):
             self.layer.append(copy.deepcopy(layer))
 
     def forward(self, hidden_states):
-        attn_weights = []
+        attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os = [], [], [], [], [], []
         for layer_block in self.layer:
-            hidden_states, weights = layer_block(hidden_states)
+            hidden_states, weights, head_Q, head_K, head_V, head_O = layer_block(hidden_states)
             if self.vis:
                 attn_weights.append(weights)
+                head_Qs.append(head_Q)
+                head_Ks.append(head_K)
+                head_Vs.append(head_V)
+                head_Os.append(head_O)
+                concat_Os.append(hidden_states)
         encoded = self.encoder_norm(hidden_states)
-        return encoded, attn_weights
+        return encoded, attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os
 
 
 class Transformer(nn.Module):
@@ -256,8 +269,8 @@ class Transformer(nn.Module):
 
     def forward(self, input_ids):
         embedding_output = self.embeddings(input_ids)
-        encoded, attn_weights = self.encoder(embedding_output)
-        return encoded, attn_weights
+        encoded, attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os = self.encoder(embedding_output)
+        return encoded, attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os
 
 
 class VisionTransformer(nn.Module):
@@ -271,7 +284,7 @@ class VisionTransformer(nn.Module):
         self.head = Linear(config.hidden_size, num_classes)
 
     def forward(self, x, labels=None):
-        x, attn_weights = self.transformer(x)
+        x, attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os = self.transformer(x)
         logits = self.head(x[:, 0])
 
         if labels is not None:
@@ -279,7 +292,7 @@ class VisionTransformer(nn.Module):
             loss = loss_function(logits.view(-1, self.num_classes), labels.view(-1))
             return loss
         else:
-            return logits
+            return logits, attn_weights, head_Qs, head_Ks, head_Vs, head_Os, concat_Os
 
     def load_from(self, weights):
         with torch.no_grad():
@@ -338,10 +351,12 @@ class VisionTransformer(nn.Module):
 
 
 CONFIGS = {
-    'ViT-B_16': configs.get_b16_config(),
+    'ViT-B_16-h12': configs.get_b16_config(),
     'ViT-B_16-h2': configs.get_b16_head2_config(),
     'ViT-B_16-h4': configs.get_b16_head4_config(),
+    'ViT-B_16-h8': configs.get_b16_head8_config(),
     'ViT-B_16-h16': configs.get_b16_head16_config(),
+    'ViT-B_16-h32': configs.get_b16_head32_config(),
     'ViT-B_32': configs.get_b32_config(),
     'ViT-L_16': configs.get_l16_config(),
     'ViT-L_32': configs.get_l32_config(),

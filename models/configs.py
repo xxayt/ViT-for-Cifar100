@@ -76,6 +76,18 @@ def get_b16_head4_config():
     config.representation_size = None
     return config
 
+def get_b16_head8_config():
+    """Returns the ViT-B/32 configuration."""
+    config = get_b16_config()
+    config.transformer.num_heads = 8
+    return config
+
+def get_b16_head32_config():
+    """Returns the ViT-B/32 configuration."""
+    config = get_b16_config()
+    config.transformer.num_heads = 32
+    return config
+
 def get_b16_head16_config():
     """Returns the ViT-B/16 configuration."""
     config = ml_collections.ConfigDict()

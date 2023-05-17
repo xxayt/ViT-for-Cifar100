@@ -78,13 +78,13 @@ def parse_option():
     parser.add_argument('--pretrain', type=str, default="ViT-B_16.npz", help='vit_base_patch16_224_in21k.pth')
     parser.add_argument('--model_file', type=str, default='modeling')
     parser.add_argument("--model_name", 
-                        choices=["ViT-B_16", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16", "ViT-B_16-h4", "ViT-B_16-h16", "ViT-B_16-h2"],
+                        choices=["ViT-B_16-h12", "ViT-B_32", "ViT-L_16", "ViT-L_32", "ViT-H_14", "R50-ViT-B_16",
+                                "ViT-B_16-h4", "ViT-B_16-h16", "ViT-B_16-h2", "ViT-B_16-h8", "ViT-B_16-h32"],
                         default="ViT-B_16", help="Which variant to use.")
     # 是否冻结权重
 
     parser.add_argument("--img_size", default=224, type=int,
                         help="Resolution size")
-    
     parser.add_argument("--eval_batch_size", default=32, type=int,
                         help="Total batch size for eval.")
     parser.add_argument("--eval_every", default=100, type=int,
@@ -213,7 +213,7 @@ def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, o
         images = images.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
 
-        output = model(images)
+        output = model(images)[0]  # return logits and attn, only need logits
         loss = loss_function(output, target)
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
 
@@ -270,7 +270,7 @@ def validate(val_loader, model, loss_function, epoch, logger, args, tb_writer=No
         images = images.cuda(non_blocking=True)
         target = target.cuda(non_blocking=True)
 
-        output = model(images)
+        output = model(images)[0]  # return logits and attn, only need logits
         loss = loss_function(output, target)
 
         # 更新记录

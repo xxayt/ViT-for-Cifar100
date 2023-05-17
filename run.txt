@@ -7,6 +7,9 @@ CUDA_VISIBLE_DEVICES=1 python train.py --name cifar100-b16 --dataset cifar100 --
 CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16 --data cifar100 --model_name ViT-B_16 --pretrain ViT-B_16.npz
 CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h4 --data cifar100 --model_name ViT-B_16-h4 --pretrain ViT-B_16.npz
 CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h16 --data cifar100 --model_name ViT-B_16-h16 --pretrain ViT-B_16.npz
+CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h2 --data cifar100 --model_name ViT-B_16-h2 --pretrain ViT-B_16.npz
+CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h8 --data cifar100 --model_name ViT-B_16-h8 --pretrain ViT-B_16.npz
+CUDA_VISIBLE_DEVICES=1 python vit_train.py --name cifar100-b16h32 --data cifar100 --model_name ViT-B_16-h32 --pretrain ViT-B_16.npz
 # 杀内存
 fuser -v /dev/nvidia*
 kill -9 ...
