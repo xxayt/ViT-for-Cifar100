@@ -214,7 +214,9 @@ def train_one_epoch_local_data(train_loader, val_loader, model, loss_function, o
         target = target.cuda(non_blocking=True)
 
         output = model(images)[0]  # return logits and attn, only need logits
+        print(output.shape, target.shape)
         loss = loss_function(output, target)
+        return
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
 
         loss.backward()
